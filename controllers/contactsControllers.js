@@ -64,3 +64,27 @@ export const updateContact = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateStatusContact = async (req, res, next) => {
+  try {
+    if (
+      !(
+        Object.keys(req.body).length === 1 &&
+        Object.keys(req.body).includes("favorite")
+      )
+    ) {
+      throw HttpError(400, "Body must have only one field <favorite>");
+    }
+
+    const { contactId: id } = req.params;
+
+    const result = await contactsService.updateStatusContact(id, req.body);
+    if (!result) {
+      throw HttpError(404);
+    }
+
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
