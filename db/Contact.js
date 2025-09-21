@@ -23,11 +23,15 @@ export const Contact = sequelize.define("contact", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  owner: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
 
 Contact.sync()
   .then(() => {
-    console.log("Database objects successfully updated");
+    console.log("Database object contacts successfully updated");
   })
   .catch((error) => {
     console.log(error.message);
