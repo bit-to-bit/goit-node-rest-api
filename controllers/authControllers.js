@@ -1,6 +1,9 @@
+import path from "path";
+import fs from "fs/promises";
 import * as authServices from "../services/authServices.js";
 import HttpError from "../helpers/HttpError.js";
 import compareHash from "../helpers/compareHash.js";
+import { getAvatarUrl } from "../helpers/avatar.js";
 import { createToken } from "../helpers/jwt.js";
 
 const register = async (req, res, next) => {
@@ -54,11 +57,12 @@ const login = async (req, res, next) => {
 
 const getCurrentUser = (req, res, next) => {
   try {
-    const { email, subscription } = req.user;
+    const { email, subscription, avatarURL } = req.user;
 
     res.json({
       email,
       subscription,
+      avatarURL,
     });
   } catch (error) {
     next(error);
@@ -75,9 +79,29 @@ const logout = async (req, res, next) => {
   }
 };
 
+const updateAvatar = async (req, res, next) => {
+  const { id } = req.user;
+  const fileName = req.file.filename;
+  const tempFilePath = req.file.path;
+  const storageFilePath = path.resolve("public", "avatars", fileName);
+  try {
+    await fs.rename(tempFilePath, storageFilePath);
+    const avatar = await getAvatarUrl(req.headers.host, fileName);
+    const { avatarURL } = await authServices.updateUser(
+      { id },
+      { avatarURL: avatar }
+    );
+    res.status(200).json({ avatarURL });
+  } catch (error) {
+    await fs.unlink(tempFilePath);
+    return next(error);
+  }
+};
+
 export default {
   register,
   login,
   getCurrentUser,
   logout,
+  updateAvatar,
 };
