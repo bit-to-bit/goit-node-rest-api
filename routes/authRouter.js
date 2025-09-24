@@ -3,7 +3,11 @@ import isEmptyBody from "../middlewares/isEmptyBody.js";
 import validateBody from "../middlewares/validateBody.js";
 import authenticate from "../middlewares/authenticate.js";
 import upload from "../middlewares/upload.js";
-import { registerAuthSchema, loginAuthSchema } from "../schemas/authSchemas.js";
+import {
+  registerAuthSchema,
+  loginAuthSchema,
+  authEmailSchema,
+} from "../schemas/authSchemas.js";
 import authControllers from "../controllers/authControllers.js";
 
 const authRouter = express.Router();
@@ -20,6 +24,15 @@ authRouter.post(
   isEmptyBody,
   validateBody(loginAuthSchema),
   authControllers.login
+);
+
+authRouter.get("/verify/:verificationToken", authControllers.verify);
+
+authRouter.post(
+  "/verify",
+  isEmptyBody,
+  validateBody(authEmailSchema),
+  authControllers.resendVerify
 );
 
 authRouter.post("/logout", authenticate, authControllers.logout);
